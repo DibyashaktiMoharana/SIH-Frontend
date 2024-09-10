@@ -21,6 +21,7 @@ export function FslakwsInterface() {
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
   const micStreamRef = useRef<MediaStreamAudioSourceNode | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null)
   const transcriptionRef = useRef<HTMLDivElement>(null)
 
@@ -108,10 +109,11 @@ export function FslakwsInterface() {
 
   const startTranscription = () => {
     if ('webkitSpeechRecognition' in window) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recognitionRef.current = new (window as any).webkitSpeechRecognition()
       recognitionRef.current.continuous = true
       recognitionRef.current.interimResults = true
-
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recognitionRef.current.onresult = (event: any) => {
         let interimTranscript = ''
         let finalTranscript = ''
