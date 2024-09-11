@@ -95,16 +95,18 @@ export function FslakwsInterface() {
   }
 
   const updateVolumeMeter = () => {
-    if (!analyserRef.current || !isRecording) return
-
-    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount)
-    analyserRef.current.getByteFrequencyData(dataArray)
+    const dataArray = analyserRef.current ? new Uint8Array(analyserRef.current.frequencyBinCount) : new Uint8Array(0);
+    if (analyserRef.current) {
+      analyserRef.current.getByteFrequencyData(dataArray)
+    }
     const average = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length
     const volume = Math.min(100, Math.round((average / 255) * 100))
+    // console.log(volume)
 
     setVolumeLevel(volume)
 
     requestAnimationFrame(updateVolumeMeter)
+
   }
 
   const startTranscription = () => {
