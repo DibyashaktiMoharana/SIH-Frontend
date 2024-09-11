@@ -190,7 +190,7 @@ export function FslakwsInterface() {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'} p-8 transition-colors duration-200`}>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">FSLAKWS System</h1>
+        <h1 className="text-3xl font-bold">Threat Detection</h1>
         <div className="flex items-center space-x-2">
           <Sun className="h-4 w-4" />
           <Switch checked={isDarkMode} onCheckedChange={setIsDarkMode} />
