@@ -138,7 +138,7 @@ export function FslakwsInterface() {
   }
 
   const updateResults = () => {
-    const randomThreat = Math.random()
+    const randomThreat = 0.69 //hardcoded value for demo purposes
     if (randomThreat < 0.33) {
       setThreatLevel('safe')
       setSuggestedActions(['Continue monitoring', 'Log results'])
@@ -150,7 +150,7 @@ export function FslakwsInterface() {
       setSuggestedActions(['Immediate action required', 'Alert authorities', 'Initiate lockdown procedures'])
     }
     setMetrics({
-      accuracy: Math.random() * 100,
+      accuracy: 0.72 * 100,
       latency: Math.random() * 1000,
       throughput: Math.random() * 100
     })
