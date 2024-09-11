@@ -363,6 +363,9 @@ export function FslakwsInterface() {
   </CardContent>
 </Card>
       </div>
+    <footer className={`py-4 px-10 ${isDarkMode ? 'bg-gray-800 mt-10' : 'bg-gray-200 mt-10'} text-center`}>
+      <p>&copy; {new Date().getFullYear()} BufferBots. All rights reserved.</p>
+    </footer>
     </div>
   )
 }
