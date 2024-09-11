@@ -16,6 +16,11 @@ export function FslakwsInterface() {
   const [volumeLevel, setVolumeLevel] = useState(0)
   const [transcription, setTranscription] = useState('Start Recording to see live transcription...')
   const [isDarkMode, setIsDarkMode] = useState(true)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [language, setLanguage] = useState('')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [detectedKeywords, setDetectedKeywords] = useState<string[]>([])
+  
   const fileInputRef = useRef<HTMLInputElement>(null)
   const websocketRef = useRef<WebSocket | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
@@ -26,7 +31,50 @@ export function FslakwsInterface() {
   const transcriptionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // WebSocket setup would go here
+    websocketRef.current = new WebSocket('ws://localhost:8000/ws')
+    
+    websocketRef.current.onopen = () => {
+      console.log('WebSocket connection established')
+    }
+    
+    websocketRef.current.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+      console.log('Received data:', data)
+      
+      if (data.error) {
+        console.error('Error:', data.error)
+        return
+      }
+      
+      setLanguage(data.language)
+      setDetectedKeywords(data.detected_keywords)
+      setSuggestedActions([data.suggested_action])
+      setMetrics({
+        accuracy: Math.random() * 100, // Replace with actual accuracy if available
+        latency: data.latency * 1000, // Convert to milliseconds
+        throughput: data.throughput
+      })
+      
+      // Determine threat level based on suggested action
+      if (data.suggested_action.includes('High Risk') || data.suggested_action.includes('Critical')) {
+        setThreatLevel('threat')
+      } else if (data.suggested_action.includes('Medium Risk') || data.suggested_action.includes('Urgent')) {
+        setThreatLevel('caution')
+      } else {
+        setThreatLevel('safe')
+      }
+      
+      setIsProcessing(false)
+    }
+    
+    websocketRef.current.onerror = (error) => {
+      console.error('WebSocket error:', error)
+    }
+    
+    websocketRef.current.onclose = () => {
+      console.log('WebSocket connection closed')
+    }
+    
     return () => {
       if (websocketRef.current) {
         websocketRef.current.close()
@@ -50,10 +98,9 @@ export function FslakwsInterface() {
     const file = event.target.files?.[0]
     if (file) {
       setIsProcessing(true)
-      // Simulating processing
+      // Simulate file processing (replace with actual file handling logic)
       setTimeout(() => {
         setIsProcessing(false)
-        updateResults()
       }, 3000)
     }
   }
@@ -71,11 +118,6 @@ export function FslakwsInterface() {
       if (recognitionRef.current) {
         recognitionRef.current.stop()
       }
-      // Simulating processing
-      setTimeout(() => {
-        setIsProcessing(false)
-        updateResults()
-      }, 3000)
     } else {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -94,17 +136,20 @@ export function FslakwsInterface() {
     }
   }
 
-  const updateVolumeMeter = () => {
-    if (!analyserRef.current || !isRecording) return
 
-    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount)
-    analyserRef.current.getByteFrequencyData(dataArray)
+  const updateVolumeMeter = () => {
+    const dataArray = analyserRef.current ? new Uint8Array(analyserRef.current.frequencyBinCount) : new Uint8Array(0);
+    if (analyserRef.current) {
+      analyserRef.current.getByteFrequencyData(dataArray)
+    }
     const average = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length
     const volume = Math.min(100, Math.round((average / 255) * 100))
+    // console.log(volume)
 
     setVolumeLevel(volume)
 
     requestAnimationFrame(updateVolumeMeter)
+
   }
 
   const startTranscription = () => {
@@ -135,24 +180,24 @@ export function FslakwsInterface() {
     }
   }
 
-  const updateResults = () => {
-    const randomThreat = Math.random()
-    if (randomThreat < 0.33) {
-      setThreatLevel('safe')
-      setSuggestedActions(['Continue monitoring', 'Log results'])
-    } else if (randomThreat < 0.66) {
-      setThreatLevel('caution')
-      setSuggestedActions(['Increase surveillance', 'Notify supervisor'])
-    } else {
-      setThreatLevel('threat')
-      setSuggestedActions(['Immediate action required', 'Alert authorities', 'Initiate lockdown procedures'])
-    }
-    setMetrics({
-      accuracy: Math.random() * 100,
-      latency: Math.random() * 1000,
-      throughput: Math.random() * 100
-    })
-  }
+  // const updateResults = () => {
+  //   const randomThreat = Math.random()
+  //   if (randomThreat < 0.33) {
+  //     setThreatLevel('safe')
+  //     setSuggestedActions(['Continue monitoring', 'Log results'])
+  //   } else if (randomThreat < 0.66) {
+  //     setThreatLevel('caution')
+  //     setSuggestedActions(['Increase surveillance', 'Notify supervisor'])
+  //   } else {
+  //     setThreatLevel('threat')
+  //     setSuggestedActions(['Immediate action required', 'Alert authorities', 'Initiate lockdown procedures'])
+  //   }
+  //   setMetrics({
+  //     accuracy: Math.random() * 100,
+  //     latency: Math.random() * 1000,
+  //     throughput: Math.random() * 100
+  //   })
+  // }
 
   const CircularProgress = ({ value, label, color }: { value: number, label: string, color: string }) => (
     <div className="relative w-24 h-24">
@@ -361,6 +406,9 @@ export function FslakwsInterface() {
   </CardContent>
 </Card>
       </div>
+    <footer className={`py-4 px-10 ${isDarkMode ? 'bg-gray-800 mt-10' : 'bg-gray-200 mt-10'} text-center`}>
+      <p>&copy; {new Date().getFullYear()} BufferBots. All rights reserved.</p>
+    </footer>
     </div>
   )
 }
