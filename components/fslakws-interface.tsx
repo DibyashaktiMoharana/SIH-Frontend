@@ -109,33 +109,72 @@ export function FslakwsInterface() {
 
   }
 
+  // const startTranscription = () => {
+  //   if ('webkitSpeechRecognition' in window) {
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     recognitionRef.current = new (window as any).webkitSpeechRecognition()
+  //     recognitionRef.current.continuous = true
+  //     recognitionRef.current.interimResults = true
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     recognitionRef.current.onresult = (event: any) => {
+  //       let interimTranscript = ''
+  //       let finalTranscript = ''
+
+  //       for (let i = event.resultIndex; i < event.results.length; ++i) {
+  //         if (event.results[i].isFinal) {
+  //           finalTranscript += event.results[i][0].transcript
+  //         } else {
+  //           interimTranscript += event.results[i][0].transcript
+  //         }
+  //       }
+
+  //       setTranscription(finalTranscript || interimTranscript)
+  //     }
+
+  //     recognitionRef.current.start()
+  //   } else {
+  //     console.error('Web Speech API is not supported in this browser')
+  //   }
+  // }
+
   const startTranscription = () => {
     if ('webkitSpeechRecognition' in window) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      recognitionRef.current = new (window as any).webkitSpeechRecognition()
-      recognitionRef.current.continuous = true
-      recognitionRef.current.interimResults = true
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      recognitionRef.current.onresult = (event: any) => {
-        let interimTranscript = ''
-        let finalTranscript = ''
-
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript
-          } else {
-            interimTranscript += event.results[i][0].transcript
-          }
-        }
-
-        setTranscription(finalTranscript || interimTranscript)
-      }
-
-      recognitionRef.current.start()
+      recognitionRef.current = new (window as any).webkitSpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+  
+      // Remove the existing transcription logic and use a setInterval instead
+      // to update the transcription state every 5 seconds.
+      const scamKeywords = ['credit card ,', 'bank account , Pin ,', 'authorization ,', 'password ,'];
+        //  'social security number ,', 'personal information ,', 'account number ,', 'security code ,', 'expiration date ,', 'CVV ,', 'PIN ,', 'debit card ,', 'credit card number ,', 'credit card details ,', 'credit card information ,', 'credit card fraud ,', 'credit card scam ,', 'credit card theft ,', 'credit card security ,', 'credit card verification ,', 'credit card validation ,', 'credit card expiration ,', 'credit card limit ,', 'credit card balance ,', 'credit card statement ,', 'credit card payment ,', 'credit card transaction ,', 'credit card application ,', 'credit card approval ,', 'credit card rejection ,', 'credit card dispute ,', 'credit card chargeback ,', 'credit card refund ,', 'credit card cancellation ,', 'credit card activation ,', 'credit card deactivation ,', 'credit card suspension ,', 'credit card termination ,', 'credit card closure ,', 'credit card upgrade ,', 'credit card downgrade ,', 'credit card limit increase ,', 'credit card limit decrease ,', 'credit card balance transfer ,', 'credit card cash advance ,', 'credit card rewards ,', 'credit card points ,', 'credit card miles ,', 'credit card benefits ,', 'credit card features ,', 'credit card fees ,', 'credit card interest ,', 'credit card APR ,', 'credit card grace period ,', 'credit card billing cycle ,', 'credit card due date ,', 'credit card minimum payment ,', 'credit card late fee ,', 'credit card overlimit fee ,', 'credit card foreign transaction fee ,', 'credit card annual fee ,', 'credit card cash advance fee ,', 'credit card balance transfer fee ,', 'credit card convenience fee ,', 'credit card processing fee ,', 'credit card service fee ,', 'credit card penalty fee ,', 'credit card finance charge ,', 'credit card interest rate ,', 'credit card credit limit ,', 'credit card credit score ,', 'credit card credit report ,', 'credit card credit history ,', 'credit card creditworthiness ,', 'credit card credit utilization ,', 'credit card credit inquiry ,', 'credit card credit application ,', 'credit card credit approval ,', 'credit card credit rejection ,', 'credit card credit dispute ,', 'credit card credit repair ,', 'credit card credit counseling];
+      let currentIndex = 0;
+      setTranscription('');
+      // Create a function to update the transcription state sequentially
+      const updateTranscription = () => {
+        // Append the next keyword in order
+        const nextKeyword = scamKeywords[currentIndex];
+        setTranscription(prevTranscription => prevTranscription + ' ' + nextKeyword);
+  
+        // Move to the next index and reset if we've reached the end of the array
+        currentIndex = (currentIndex + 1);
+      };
+  
+      // Use setInterval to call updateTranscription every 5 seconds (5000 milliseconds)
+      const intervalId = setInterval(updateTranscription, 3000);
+      setInterval(() => { console.log(transcription) }, 3000);
+  
+      // Start the recognition (even though we don't use the onresult here)
+      recognitionRef.current.start();
+  
+      // Clear the interval when the recognition ends
+      recognitionRef.current.onend = () => {
+        clearInterval(intervalId);
+      };
     } else {
-      console.error('Web Speech API is not supported in this browser')
+      console.error('Web Speech API is not supported in this browser');
     }
-  }
+  };
 
   const updateResults = () => {
     const randomThreat = 0.69 //hardcoded value for demo purposes
