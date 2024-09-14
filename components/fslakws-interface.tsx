@@ -144,10 +144,10 @@ export function FslakwsInterface() {
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
   
-      const scamKeywords = ['credit card', 'OTP', 'authorization', 'bank account', 'password'];
-      
+      const scamKeywords = ['credit card ,', 'OTP ,', 'authorization ,', 'bank account ,', 'password'];
+
       let currentIndex = 0;
-  
+      setTranscription('');
       // Create a function to update the transcription state sequentially
       const updateTranscription = () => {
         // Append the next keyword in order
